@@ -1,0 +1,100 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
+import sys
+import requests
+import base64
+import wave
+import logging
+
+DEFAULT_HOST_URL = 'http://localhost:10001'
+
+logger = logging.getLogger('hr.ttserver.client')
+
+class TTSResponse(object):
+
+    def __init__(self):
+        self.response = None
+        self.params = {}
+
+    def get_duration(self):
+        if self.response:
+            return self.response.get('duration', 0)
+        return 0
+
+    def write(self, wavfile):
+        if self.response:
+            params = self.response['params']
+            data = self.response['data']
+            try:
+                f = wave.open(wavfile, 'wb')
+                f.setparams(params)
+                f.writeframes(data)
+                logger.info("Write to file {}".format(wavfile))
+                return True
+            except Exception as ex:
+                logger.error(ex)
+                f = None
+            finally:
+                if f:
+                    f.close()
+        else:
+            logger.error("No data to write")
+        return False
+
+    def __repr__(self):
+        return "<TTSResponse params {}, duration {}>".format(
+            self.params, self.get_duration())
+
+class Client(object):
+
+    VERSION = 'v1.0'
+
+    def __init__(self, host=None):
+        self.host = host or DEFAULT_HOST_URL
+        self.root_url = '{}/{}'.format(self.host, Client.VERSION)
+
+    def tts(self, text, **kwargs):
+        params = {
+        'text': text,
+        'vendor': kwargs.get('vendor'),
+        'voice': kwargs.get('voice')
+        }
+        timeout = kwargs.get('timeout')
+        result = TTSResponse()
+        try:
+            r = requests.get(
+                '{}/tts'.format(self.root_url), params=params, timeout=timeout)
+            if r.status_code == 200:
+                response = r.json().get('response')
+                data = response['data']
+                data = base64.b64decode(data)
+                response['data'] = data
+                result.response = response
+                result.params = params
+            else:
+                logger.error("Error code: {}".format(r.status_code))
+        except Exception as ex:
+            logger.error("TTS Error {}".format(ex))
+        return result
+
+    def asynctts(self, text, callback, **kwargs):
+        pass
+
+    def ping(self):
+        try:
+            r = requests.get('{}/ping'.format(self.root_url))
+            response = r.json().get('response')
+            if response['message'] == 'pong':
+                return True
+        except Exception:
+            return False
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    client = Client()
+    client.tts('hello', vendor='cereproc', voice='katherine').write('hello.wav')
+    client.tts('hello', vendor='cereproc', voice='giles').write('hello2.wav')
+    client.tts('hi<mark name="mark_hello"/>hello', vendor='cereproc', voice='giles').write('hello3.wav')
+    client.tts('你好', vendor='iflytek', voice='xiaoyan').write('hello4.wav')
