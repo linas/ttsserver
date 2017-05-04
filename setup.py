@@ -11,4 +11,7 @@ setup(
     install_requires=[
         'flask',
     ],
+    entry_points={
+        'console_scripts': ['run_tts_server=ttsserver.run_server:main']
+    },
 )

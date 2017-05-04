@@ -106,7 +106,7 @@ def _ping():
     return Response(json_encode({'response': {'code': 0, 'message': 'pong'}}),
                     mimetype="application/json")
 
-if __name__ == '__main__':
+def main():
     import argparse
     parser = argparse.ArgumentParser('HR TTS Server')
 
@@ -135,3 +135,6 @@ if __name__ == '__main__':
             voice.set_output_dir(os.path.join(tts_output_dir, name))
 
     app.run(host='0.0.0.0', debug=False, use_reloader=False, port=option.port)
+
+if __name__ == '__main__':
+    main()
