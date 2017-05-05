@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ttsserver',
-    version="0.1.0",
+    version="0.1.1",
     packages=['ttsserver', 'ttsserver.api'],
     description=('Hanson Robotics TTS Server.'),
     url='https://github.com/hansonrobotics/ttsserver',

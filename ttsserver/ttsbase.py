@@ -13,7 +13,6 @@ import xml.etree.ElementTree
 import uuid
 
 from audio2phoneme import audio2phoneme
-from visemes import Numb_Visemes
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger('hr.ttsserver.ttsbase')
