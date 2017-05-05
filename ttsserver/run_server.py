@@ -18,27 +18,29 @@ app = Flask(__name__)
 json_encode = json.JSONEncoder().encode
 logger = logging.getLogger('hr.tts.server')
 
-SERVER_LOG_DIR=os.path.expanduser('~/.hr/ttsserver/log')
-if not os.path.isdir(SERVER_LOG_DIR):
-    os.makedirs(SERVER_LOG_DIR)
-LOG_CONFIG_FILE = '{}/ttsserver_{}.log'.format(SERVER_LOG_DIR,
-                                            dt.datetime.strftime(dt.datetime.now(), '%Y%m%d%H%M%S'))
-link_log_fname = os.path.join(SERVER_LOG_DIR, 'ttsserver_latest.log')
-if os.path.islink(link_log_fname):
-    os.unlink(link_log_fname)
-os.symlink(LOG_CONFIG_FILE, link_log_fname)
-fh = logging.FileHandler(LOG_CONFIG_FILE)
-sh = logging.StreamHandler()
-formatter = logging.Formatter(
-    '[%(name)s][%(levelname)s] %(asctime)s: %(message)s')
-fh.setFormatter(formatter)
-sh.setFormatter(formatter)
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-root_logger.addHandler(fh)
-root_logger.addHandler(sh)
-
+KEEP_AUDIO = False
+SERVER_LOG_DIR = os.path.expanduser('~/.hr/ttsserver/log')
 VOICES = {}
+
+def init_logging():
+    if not os.path.isdir(SERVER_LOG_DIR):
+        os.makedirs(SERVER_LOG_DIR)
+    log_config_file = '{}/ttsserver_{}.log'.format(SERVER_LOG_DIR,
+                                                dt.datetime.strftime(dt.datetime.now(), '%Y%m%d%H%M%S'))
+    link_log_fname = os.path.join(SERVER_LOG_DIR, 'ttsserver_latest.log')
+    if os.path.islink(link_log_fname):
+        os.unlink(link_log_fname)
+    os.symlink(log_config_file, link_log_fname)
+    fh = logging.FileHandler(log_config_file)
+    sh = logging.StreamHandler()
+    formatter = logging.Formatter(
+        '[%(name)s][%(levelname)s] %(asctime)s: %(message)s')
+    fh.setFormatter(formatter)
+    sh.setFormatter(formatter)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(fh)
+    root_logger.addHandler(sh)
 
 def load_voices(voice_path):
     if os.path.isdir(voice_path):
@@ -91,7 +93,7 @@ def _tts():
             finally:
                 if f:
                     f.close()
-                if not keep_audio and os.path.isfile(tts_data.wavout):
+                if not KEEP_AUDIO and os.path.isfile(tts_data.wavout):
                     os.remove(tts_data.wavout)
                     logger.info("Removed file {}".format(tts_data.wavout))
     else:
@@ -107,6 +109,7 @@ def _ping():
                     mimetype="application/json")
 
 def main():
+    init_logging()
     import argparse
     parser = argparse.ArgumentParser('HR TTS Server')
 
@@ -125,7 +128,8 @@ def main():
 
     option = parser.parse_args()
 
-    keep_audio = option.keep_audio
+    global KEEP_AUDIO
+    KEEP_AUDIO = option.keep_audio
     tts_output_dir = os.path.expanduser(option.tts_output_dir)
 
     load_voices(option.voice_path)
