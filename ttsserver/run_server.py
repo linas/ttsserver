@@ -6,9 +6,6 @@ import sys
 import logging
 import datetime as dt
 
-CWD = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(CWD, '..'))
-
 from flask import Flask, request, Response
 import json
 import wave
@@ -110,6 +107,7 @@ def _ping():
 
 def main():
     init_logging()
+    cwd = os.path.dirname(os.path.realpath(__file__))
     import argparse
     parser = argparse.ArgumentParser('HR TTS Server')
 
@@ -124,7 +122,7 @@ def main():
         '--tts-output-dir',
         dest='tts_output_dir', default='~/.hr/ttsserver', help='Server port')
     parser.add_argument(
-        '--voice_path', required=True, dest='voice_path', help='Voice path')
+        '--voice_path', default=os.path.join(cwd, 'api'), dest='voice_path', help='Voice path')
 
     option = parser.parse_args()
 
