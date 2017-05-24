@@ -133,6 +133,8 @@ def main():
     tts_output_dir = os.path.expanduser(option.tts_output_dir)
 
     load_voices(option.voice_path)
+    if len(VOICES) == 0:
+        logger.warn("No any voice is loaded")
 
     for name, engine in VOICES.items():
         for voice in engine.values():
