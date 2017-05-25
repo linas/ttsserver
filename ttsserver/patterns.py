@@ -25,7 +25,6 @@ class EmphasisPattern(Pattern):
         el = etree.Element('prosody')
         el.text = match.group(3)
         el.set('rate', '-20%')
-        el.set('volume', '+40%')
         el.set('pitch', '+5%')
         return el,
 
@@ -38,7 +37,7 @@ class StrongPattern(Pattern):
         el = etree.Element('prosody')
         el.text = match.group(3)
         el.set('rate', '-30%')
-        el.set('volume', '+50%')
+        el.set('volume', '+20%')
         el.set('pitch', '+10%')
         el2 = etree.Element('break')
         el2.set('time', '300ms')

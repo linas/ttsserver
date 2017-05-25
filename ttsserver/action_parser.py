@@ -8,7 +8,7 @@ class ActionParser(object):
         self.build_patterns()
         self.recognized_nodes = {}
         self.counter = 0
-        self.sep = '\x63\x20'
+        self.sep = "0x1f"
 
     def reset(self):
         self.counter = 0
