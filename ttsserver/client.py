@@ -95,6 +95,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     client = Client()
     client.tts('hello', vendor='cereproc', voice='katherine').write('hello.wav')
-    client.tts('hello', vendor='cereproc', voice='giles').write('hello2.wav')
+    client.tts('hello', vendor='festival', voice='cmu_us_slt_arctic_hts').write('hello2.wav')
     client.tts('hi<mark name="mark_hello"/>hello', vendor='cereproc', voice='giles').write('hello3.wav')
     client.tts('你好', vendor='iflytek', voice='xiaoyan').write('hello4.wav')

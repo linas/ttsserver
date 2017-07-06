@@ -39,7 +39,7 @@ class BaseVisemes:
             if v is not None:
                 visemes.append(v)
         logger.debug("Get visemes {}".format(visemes))
-        self.expand_m_visems(visemes)
+        #self.expand_m_visems(visemes)
         return visemes
 
     def expand_m_visems(self, visemes):

@@ -4,10 +4,23 @@ import logging
 import subprocess
 from collections import defaultdict
 
-from ttsserver.ttsbase import TTSBase
-from ttsserver.ttsbase import TTSData
+from ttsserver.ttsbase import TTSBase, TTSData, BaseVisemes
 
 logger = logging.getLogger('hr.tts.festival')
+
+class FestivalTTSVisemes(BaseVisemes):
+    default_visemes_map = {
+        'A-I': ['aa','ae','ah','ao','ax','axr','ih','iy'],
+        'E': ['ay','eh','ey'],
+        'O': ['aw','ow','oy'],
+        'U': ['uh','uw'],
+        'C-D-G-K-N-S-TH': ['ch','dh','dx','g','h','jh','k','s','sh','th','y','z','zh','hh'],
+        'F-V': ['f','hv', 'v'],
+        'L': ['d','el','er','l','r','t'],
+        'M': ['b','em','en','m','n','nx','ng','p'],
+        'Q-W': ['w'],
+        'Sil': ['pau', 'brth']
+    }
 
 class FestivalTTS(TTSBase):
     def __init__(self):
@@ -73,6 +86,7 @@ def load_voices():
             api = FestivalTTS()
             api.params['voice'] = voice
             voices['festival'][voice] = api
+            api.set_viseme_mapping(FestivalTTSVisemes())
             logger.info("{}:{} added".format('festival', voice))
         except Exception as ex:
             logger.error(ex)

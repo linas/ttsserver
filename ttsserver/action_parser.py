@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xml.etree.ElementTree as etree
 import StringIO
 from patterns import StrongPattern, EmphasisPattern, MarkPattern
@@ -37,6 +38,8 @@ class ActionParser(object):
         return nodes
 
     def parse(self, text):
+        if not isinstance(text, unicode):
+            text = text.decode('utf-8')
         text = text.strip()
         self.reset()
         pattern_index = 0
@@ -57,7 +60,7 @@ class ActionParser(object):
                     place_holders.append(id)
                 else:
                     place_holders.append(node)
-            text = '{}{}{}{}{}'.format(match.group(1), self.sep, self.sep.join(place_holders), self.sep, match.groups()[-1])
+            text = u'{}{}{}{}{}'.format(match.group(1), self.sep, self.sep.join(place_holders), self.sep, match.groups()[-1])
 
         nodes = self.recover_recognized_nodes(text)
         return self.to_xml(nodes)
@@ -74,13 +77,16 @@ class ActionParser(object):
             else:
                 buf = StringIO.StringIO()
                 tree = etree.ElementTree(node)
-                tree.write(buf)
-                output.append(buf.getvalue())
+                tree.write(buf, encoding="utf-8")
+                value = buf.getvalue()
+                value = value.decode('utf-8')
+                output.append(value)
                 buf.close()
 
-        return ''.join(output)
+        return u''.join(output)
 
 if __name__ == '__main__':
     parser = ActionParser()
-    print parser.parse('*Hi there* |happy| this is **action mark down**')
+    #print parser.parse('*Hi there* |happy| this is **action mark down**')
     print parser.parse('*Hi there* |happy| |pause,2| this is **action mark down**')
+    print parser.parse(u'*Hi ß there* |happy| |pause,2| this is **action mark down**')

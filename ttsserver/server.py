@@ -5,26 +5,35 @@ import os
 import sys
 import logging
 import datetime as dt
+from collections import defaultdict
+import xml.etree.ElementTree as ET
+CWD = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.join(CWD, '..'))
 
 from flask import Flask, request, Response
 import json
 import wave
+import time
 import base64
+import shutil
 
 app = Flask(__name__)
 json_encode = json.JSONEncoder().encode
 logger = logging.getLogger('hr.tts.server')
 
-KEEP_AUDIO = False
-SERVER_LOG_DIR = os.path.expanduser('~/.hr/ttsserver/log')
+SERVER_LOG_DIR = os.path.expanduser('~/.hr/log/ttsserver')
+TTS_TMP_OUTPUT_DIR = os.path.expanduser('~/.hr/ttsserver/tmp')
+if not os.path.isdir(TTS_TMP_OUTPUT_DIR):
+    os.makedirs(TTS_TMP_OUTPUT_DIR)
 VOICES = {}
+KEEP_AUDIO = False
 
 def init_logging():
     if not os.path.isdir(SERVER_LOG_DIR):
         os.makedirs(SERVER_LOG_DIR)
-    log_config_file = '{}/ttsserver_{}.log'.format(SERVER_LOG_DIR,
+    log_config_file = '{}/{}.log'.format(SERVER_LOG_DIR,
                                                 dt.datetime.strftime(dt.datetime.now(), '%Y%m%d%H%M%S'))
-    link_log_fname = os.path.join(SERVER_LOG_DIR, 'ttsserver_latest.log')
+    link_log_fname = os.path.join(SERVER_LOG_DIR, 'latest.log')
     if os.path.islink(link_log_fname):
         os.unlink(link_log_fname)
     os.symlink(log_config_file, link_log_fname)
@@ -75,6 +84,7 @@ def _tts():
         response['phonemes'] = tts_data.phonemes
         response['markers'] = tts_data.markers
         response['words'] = tts_data.words
+        response['visemes'] = tts_data.visemes
         response['duration'] = tts_data.get_duration()
         response['nodes'] = tts_data.get_nodes()
         if tts_data.wavout:
@@ -90,9 +100,26 @@ def _tts():
             finally:
                 if f:
                     f.close()
-                if not KEEP_AUDIO and os.path.isfile(tts_data.wavout):
-                    os.remove(tts_data.wavout)
-                    logger.info("Removed file {}".format(tts_data.wavout))
+                if os.path.isfile(tts_data.wavout):
+                    timestamp = time.time()
+                    try:
+                        root = u'<_root_>{}</_root_>'.format(text)
+                        tree = ET.fromstring(root.encode('utf-8'))
+                        notags = ET.tostring(tree, encoding='utf8', method='text')
+                        notags = notags.strip()
+                        tmp_file = '{} - {}.wav'.format(notags, timestamp)
+                    except Exception as ex:
+                        logger.error(ex)
+                        tmp_file = '{} - {}.wav'.format(os.path.splitext(
+                            os.path.basename(tts_data.wavout))[0], timestamp)
+                    tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
+                    try:
+                        shutil.copy(tts_data.wavout, tmp_file)
+                    except IOError as err:
+                        logger.error(err)
+                    if not KEEP_AUDIO:
+                        os.remove(tts_data.wavout)
+                        logger.info("Removed file {}".format(tts_data.wavout))
     else:
         response['error'] = "Can't get api"
         logger.error("Can't get api {}:{}".format(vendor, voice))

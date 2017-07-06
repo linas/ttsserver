@@ -13,6 +13,7 @@ import xml.etree.ElementTree
 import uuid
 
 from audio2phoneme import audio2phoneme
+from ttsserver.visemes import BaseVisemes
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger('hr.ttsserver.ttsbase')
@@ -25,6 +26,7 @@ class TTSData:
         self.phonemes = []
         self.markers = []
         self.words = []
+        self.visemes = []
 
     def get_duration(self):
         if os.path.isfile(self.wavout):
@@ -52,11 +54,15 @@ class TTSException(Exception):
 class TTSBase(object):
     def __init__(self):
         self.output_dir = '.'
+        self.viseme_mapping = None
 
     def set_output_dir(self, output_dir):
         self.output_dir = os.path.expanduser(output_dir)
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
+
+    def set_viseme_mapping(self, mapping):
+        self.viseme_mapping = mapping
 
     def get_tts_session_params(self):
         raise NotImplementedError("get_tts_session_params is not implemented")
@@ -64,10 +70,10 @@ class TTSBase(object):
     def set_voice(self, voice):
         raise NotImplementedError("set_voice is not implemented")
 
-    def do_tts(self, tts_data):
+    def do_tts(self, tts_data, **kwargs):
         raise NotImplementedError("_tts is not implemented")
 
-    def tts(self, text, wavout=None):
+    def tts(self, text, wavout=None, **kwargs):
         try:
             if wavout is None:
                 id = str(uuid.uuid1())
@@ -77,10 +83,30 @@ class TTSBase(object):
             if isinstance(text, unicode):
                 text = text.encode('utf8')
             tts_data = TTSData(text, wavout)
-            self.do_tts(tts_data)
+            self.do_tts(tts_data, **kwargs)
+            if self.viseme_mapping is not None:
+                tts_data.visemes = self.viseme_mapping.get_visemes(tts_data.phonemes)
             return tts_data
         except Exception as ex:
             logger.error(ex)
+
+
+class Numb_Visemes(BaseVisemes):
+    # Mapping is approx. May need tunning
+    # All phonemes are from cereproc documentation
+    # https://www.cereproc.com/files/CereVoiceCloudGuide.pdf
+    default_visemes_map = {
+        'A-I': ['A','AA','AI','AU','AE','AH','AW','AX','AY','EY',],
+        'E': ['E','E@','EI','II','IY','EI', 'EH',],
+        'F-V': ['F','V'],
+        'Q-W': ['W'],
+        'L': ['@', '@@', 'I', 'I@','IH','L', 'R', 'Y', 'R'],
+        'C-D-G-K-N-S-TH': ['CH','D','DH','G','H','HH','JH','K','N','NG','S','SH','T','TH','Z','ZH','DX','ER',],
+        'M': ['B','M','P'],
+        'O': ['O','OI','OO','OU','AO','OW','OY',],
+        'U': ['U','U@','UH','UU','UW'],
+        'Sil': ['SIL']
+    }
 
 class NumbTTS(TTSBase):
 

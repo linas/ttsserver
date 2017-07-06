@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ttsserver',
-    version="0.1.7",
+    version="0.1.8",
     packages=['ttsserver'],
     description=('Hanson Robotics TTS Server.'),
     url='https://github.com/hansonrobotics/ttsserver',
@@ -12,6 +12,6 @@ setup(
         'flask',
     ],
     entry_points={
-        'console_scripts': ['run_tts_server=ttsserver.run_server:main']
+        'console_scripts': ['run_tts_server=ttsserver.server:main']
     },
 )
