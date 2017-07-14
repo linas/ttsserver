@@ -56,10 +56,9 @@ class Client(object):
 
     def tts(self, text, **kwargs):
         params = {
-        'text': text,
-        'vendor': kwargs.get('vendor'),
-        'voice': kwargs.get('voice')
+            'text': text,
         }
+        params.update(kwargs)
         timeout = kwargs.get('timeout')
         result = TTSResponse()
         try:
@@ -94,7 +93,10 @@ class Client(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     client = Client()
-    client.tts('hello', vendor='cereproc', voice='katherine').write('hello.wav')
-    client.tts('hello', vendor='festival', voice='cmu_us_slt_arctic_hts').write('hello2.wav')
+    client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='sad', chunk_size=512, semitones=-2).write('happy.wav')
+    client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='sad').write('sad.wav')
+    client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='afraid').write('afraid.wav')
+    client.tts('hello hello hello', vendor='cereproc', voice='giles', emotion='happy_tensed').write('happy_tensed.wav')
+    client.tts('hello', vendor='cereproc', voice='giles').write('hello2.wav')
     client.tts('hi<mark name="mark_hello"/>hello', vendor='cereproc', voice='giles').write('hello3.wav')
     client.tts('你好', vendor='iflytek', voice='xiaoyan').write('hello4.wav')

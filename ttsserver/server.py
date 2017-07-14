@@ -77,49 +77,58 @@ def _tts():
     vendor = request.args.get('vendor')
     voice = request.args.get('voice')
     text = request.args.get('text')
+    params = request.args.to_dict()
+    for p in ['vendor', 'voice', 'text']:
+        params.pop(p)
     response = {}
     api = get_api(vendor, voice)
     if api:
-        tts_data = api.tts(text)
-        response['phonemes'] = tts_data.phonemes
-        response['markers'] = tts_data.markers
-        response['words'] = tts_data.words
-        response['visemes'] = tts_data.visemes
-        response['duration'] = tts_data.get_duration()
-        response['nodes'] = tts_data.get_nodes()
-        if tts_data.wavout:
-            logger.info("TTS file {}".format(tts_data.wavout))
-            try:
-                f = wave.open(tts_data.wavout, 'rb')
-                data = f.readframes(f.getnframes())
-                response['data'] = base64.b64encode(data)
-                response['params'] = f.getparams()
-            except Exception as ex:
-                logger.error(ex)
-                f = None
-            finally:
-                if f:
-                    f.close()
-                if os.path.isfile(tts_data.wavout):
-                    timestamp = time.time()
-                    try:
-                        root = u'<_root_>{}</_root_>'.format(text)
-                        tree = ET.fromstring(root.encode('utf-8'))
-                        notags = ET.tostring(tree, encoding='utf8', method='text')
-                        notags = notags.strip()
-                        tmp_file = '{} - {}.wav'.format(notags, timestamp)
-                    except Exception as ex:
-                        logger.error(ex)
-                        tmp_file = '{} - {}.wav'.format(os.path.splitext(
-                            os.path.basename(tts_data.wavout))[0], timestamp)
-                    tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
-                    try:
-                        shutil.copy(tts_data.wavout, tmp_file)
-                    except IOError as err:
-                        logger.error(err)
-                    if not KEEP_AUDIO:
-                        os.remove(tts_data.wavout)
-                        logger.info("Removed file {}".format(tts_data.wavout))
+        tts_data = api.tts(text, **params)
+        if tts_data is None:
+            response['error'] = "No TTS data"
+            logger.error("No TTS data {}:{}".format(vendor, voice))
+        else:
+            response['phonemes'] = tts_data.phonemes
+            response['markers'] = tts_data.markers
+            response['words'] = tts_data.words
+            response['visemes'] = tts_data.visemes
+            response['duration'] = tts_data.get_duration()
+            response['nodes'] = tts_data.get_nodes()
+            if tts_data.wavout:
+                logger.info("TTS file {}".format(tts_data.wavout))
+                try:
+                    f = wave.open(tts_data.wavout, 'rb')
+                    data = f.readframes(f.getnframes())
+                    response['data'] = base64.b64encode(data)
+                    response['params'] = f.getparams()
+                except Exception as ex:
+                    logger.error(ex)
+                    f = None
+                finally:
+                    if f:
+                        f.close()
+                    if os.path.isfile(tts_data.wavout):
+                        timestamp = time.time()
+                        try:
+                            root = u'<_root_>{}</_root_>'.format(text)
+                            tree = ET.fromstring(root.encode('utf-8'))
+                            notags = ET.tostring(tree, encoding='utf8', method='text')
+                            notags = notags.strip()
+                            if len(notags) > 200:
+                                notags = notags[:200]+'...' # prevent filename too long(255)
+                            tmp_file = '{} - {}.wav'.format(notags, timestamp)
+                        except Exception as ex:
+                            logger.error(ex)
+                            tmp_file = '{} - {}.wav'.format(os.path.splitext(
+                                os.path.basename(tts_data.wavout))[0], timestamp)
+                        tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
+                        try:
+                            shutil.copy(tts_data.wavout, tmp_file)
+                        except IOError as err:
+                            logger.error(err)
+                        if not KEEP_AUDIO:
+                            os.remove(tts_data.wavout)
+                            logger.info("Removed file {}".format(tts_data.wavout))
     else:
         response['error'] = "Can't get api"
         logger.error("Can't get api {}:{}".format(vendor, voice))

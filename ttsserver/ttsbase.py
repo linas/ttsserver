@@ -11,12 +11,23 @@ import shutil
 import yaml
 import xml.etree.ElementTree
 import uuid
+import traceback
 
 from audio2phoneme import audio2phoneme
 from ttsserver.visemes import BaseVisemes
+from espp.emotivespeech import emotive_speech
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger('hr.ttsserver.ttsbase')
+
+
+def get_duration(wav_fname):
+    if os.path.isfile(wav_fname):
+        rate, data = wavfile.read(wav_fname)
+        duration = data.shape[0]/rate
+    else:
+        duration = 0.0
+    return duration
 
 # User data class to store information
 class TTSData:
@@ -29,12 +40,7 @@ class TTSData:
         self.visemes = []
 
     def get_duration(self):
-        if os.path.isfile(self.wavout):
-            rate, data = wavfile.read(self.wavout)
-            duration = data.shape[0]/rate
-        else:
-            duration = 0
-        return duration
+        return get_duration(self.wavout)
 
     def get_nodes(self):
         typeorder = {'marker': 1, 'word': 2, 'phoneme': 3}
@@ -70,8 +76,13 @@ class TTSBase(object):
     def set_voice(self, voice):
         raise NotImplementedError("set_voice is not implemented")
 
-    def do_tts(self, tts_data, **kwargs):
+    def do_tts(self, tts_data):
         raise NotImplementedError("_tts is not implemented")
+
+    def _adjust_phonemes_timing(self, phonemes, ratio):
+        for p in phonemes:
+            p['start'] = p['start']*ratio
+            p['end'] = p['end']*ratio
 
     def tts(self, text, wavout=None, **kwargs):
         try:
@@ -83,7 +94,18 @@ class TTSBase(object):
             if isinstance(text, unicode):
                 text = text.encode('utf8')
             tts_data = TTSData(text, wavout)
-            self.do_tts(tts_data, **kwargs)
+            self.do_tts(tts_data)
+            emotion = kwargs.get('emotion')
+            orig_duration = tts_data.get_duration()
+            if emotion is not None and orig_duration < 3: # the process time would be too long for longer audio
+                try:
+                    ofile = '{}/emo_tmp.wav'.format(os.path.dirname(tts_data.wavout))
+                    emotive_speech(tts_data.wavout, ofile, **kwargs)
+                    shutil.move(ofile, tts_data.wavout)
+                    emo_duration = tts_data.get_duration()
+                    self._adjust_phonemes_timing(tts_data.phonemes, emo_duration/orig_duration)
+                except Exception as ex:
+                    logger.error(traceback.format_exc())
             if self.viseme_mapping is not None:
                 tts_data.visemes = self.viseme_mapping.get_visemes(tts_data.phonemes)
             return tts_data
