@@ -137,7 +137,7 @@ def happy_cents_for_utterance(start_time_now):
             happy_inflection_function(
                 normalize_function(
                     start_time_now[i])))
-    if cents:
+    if len(cents) > 0:
         cents = np.concatenate(cents)
         cents = cents.tolist()
     return cents
@@ -150,7 +150,7 @@ def afraid_cents_for_utterance(start_time_now):
             afraid_inflection_function(
                 normalize_function(
                     start_time_now[i])))
-    if cents:
+    if len(cents) > 0:
         cents = np.concatenate(cents)
         cents = cents.tolist()
     return cents
@@ -163,17 +163,17 @@ def happy_tensed_cents_for_utterance(start_time_now):
             happy_tensed_inflection_function(
                 normalize_function(
                     start_time_now[i])))
-    if cents:
+    if len(cents) > 0:
         cents = np.concatenate(cents)
         cents = cents.tolist()
     return cents
 
 
 def concatenate_list(start_time_now, end_time_now):
-    if start_time_now:
+    if len(start_time_now) > 0:
         start_time_now = np.concatenate(start_time_now)
         start_time_now = start_time_now.tolist()
-    if end_time_now:
+    if len(end_time_now) > 0:
         end_time_now = np.concatenate(end_time_now)
         end_time_now = end_time_now.tolist()
     return start_time_now, end_time_now

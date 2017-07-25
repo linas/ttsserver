@@ -97,7 +97,7 @@ class TTSBase(object):
             self.do_tts(tts_data)
             emotion = kwargs.get('emotion')
             orig_duration = tts_data.get_duration()
-            if emotion is not None and orig_duration < 3: # the process time would be too long for longer audio
+            if emotion is not None and orig_duration < 5: # the process time would be too long for longer audio
                 try:
                     ofile = '{}/emo_tmp.wav'.format(os.path.dirname(tts_data.wavout))
                     emotive_speech(tts_data.wavout, ofile, **kwargs)
@@ -110,7 +110,7 @@ class TTSBase(object):
                 tts_data.visemes = self.viseme_mapping.get_visemes(tts_data.phonemes)
             return tts_data
         except Exception as ex:
-            logger.error(ex)
+            logger.error(traceback.format_exc())
 
 
 class Numb_Visemes(BaseVisemes):
@@ -149,7 +149,7 @@ class NumbTTS(TTSBase):
             try:
                 tts_data.phonemes = self.get_phonemes(fname)
             except Exception as ex:
-                logger.error(ex)
+                logger.error(traceback.format_exc())
                 tts_data.phonemes = []
 
     def get_phonemes(self, fname):
@@ -179,9 +179,7 @@ class OnlineTTS(TTSBase):
         self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
 
     def get_cache_file(self, text):
-        suffix = hashlib.sha1(text+str(self.get_tts_session_params())).hexdigest()[:6]
-        filename = os.path.join(self.cache_dir, suffix+'.wav')
-        return filename
+        raise NotImplementedError("set_voice is not implemented")
 
     def offline_tts(self, tts_data):
         cache_file = self.get_cache_file(tts_data.text)
@@ -208,6 +206,8 @@ class ChineseTTSBase(OnlineTTS):
         super(ChineseTTSBase, self).__init__()
 
     def get_cache_file(self, text):
+        if isinstance(text, unicode):
+            text = text.encode('utf-8')
         delimiter = '#'
         pys = pinyin.get(text, delimiter=delimiter)
         if pys:
