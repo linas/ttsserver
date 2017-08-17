@@ -60,12 +60,16 @@ class TTSException(Exception):
 class TTSBase(object):
     def __init__(self):
         self.output_dir = '.'
+        self.emo_cache_dir = '.' # emotive speech cache dir
         self.viseme_mapping = None
 
     def set_output_dir(self, output_dir):
         self.output_dir = os.path.expanduser(output_dir)
+        self.emo_cache_dir = os.path.join(self.output_dir, 'emo_cache')
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
+        if not os.path.isdir(self.emo_cache_dir):
+            os.makedirs(self.emo_cache_dir)
 
     def set_viseme_mapping(self, mapping):
         self.viseme_mapping = mapping
@@ -73,11 +77,21 @@ class TTSBase(object):
     def get_tts_session_params(self):
         raise NotImplementedError("get_tts_session_params is not implemented")
 
+    def get_emo_cache_file(self, text, params):
+        if isinstance(text, unicode):
+            text = text.encode('utf-8')
+        hashcode = hashlib.sha1(text+str(params)).hexdigest()[:40]
+        filename = os.path.join(self.emo_cache_dir, hashcode+'.wav')
+        return filename
+
+    def get_cache_file(self, text):
+        raise NotImplementedError("get_cache_file is not implemented")
+
     def set_voice(self, voice):
         raise NotImplementedError("set_voice is not implemented")
 
     def do_tts(self, tts_data):
-        raise NotImplementedError("_tts is not implemented")
+        raise NotImplementedError("do_tts is not implemented")
 
     def _adjust_phonemes_timing(self, phonemes, ratio):
         for p in phonemes:
@@ -97,10 +111,17 @@ class TTSBase(object):
             self.do_tts(tts_data)
             emotion = kwargs.get('emotion')
             orig_duration = tts_data.get_duration()
-            if emotion is not None and orig_duration < 5: # the process time would be too long for longer audio
+            if emotion is not None:
+                cache_file = self.get_emo_cache_file(text, kwargs)
                 try:
                     ofile = '{}/emo_tmp.wav'.format(os.path.dirname(tts_data.wavout))
-                    emotive_speech(tts_data.wavout, ofile, **kwargs)
+                    if os.path.isfile(cache_file):
+                        shutil.copy(cache_file, ofile)
+                        logger.info("Get cached emotive speech tts for {} {}".format(
+                            text, cache_file))
+                    else:
+                        emotive_speech(tts_data.wavout, ofile, **kwargs)
+                        shutil.copy(ofile, cache_file)
                     shutil.move(ofile, tts_data.wavout)
                     emo_duration = tts_data.get_duration()
                     self._adjust_phonemes_timing(tts_data.phonemes, emo_duration/orig_duration)
@@ -129,6 +150,7 @@ class Numb_Visemes(BaseVisemes):
         'U': ['U','U@','UH','UU','UW'],
         'Sil': ['SIL']
     }
+
 
 class NumbTTS(TTSBase):
 
@@ -178,9 +200,6 @@ class OnlineTTS(TTSBase):
         super(OnlineTTS, self).set_output_dir(output_dir)
         self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
 
-    def get_cache_file(self, text):
-        raise NotImplementedError("set_voice is not implemented")
-
     def offline_tts(self, tts_data):
         cache_file = self.get_cache_file(tts_data.text)
         if os.path.isfile(cache_file):
@@ -195,7 +214,7 @@ class OnlineTTS(TTSBase):
         try:
             self.offline_tts(tts_data)
         except Exception as ex:
-            logger.error(ex)
+            logger.warn(ex)
             self.online_tts(tts_data)
 
     def online_tts(self, tts_data):

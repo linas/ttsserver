@@ -17,12 +17,18 @@ import time
 import base64
 import shutil
 
+try:
+    import colorlog
+except ImportError:
+    pass
+
 app = Flask(__name__)
 json_encode = json.JSONEncoder().encode
 logger = logging.getLogger('hr.tts.server')
 
 SERVER_LOG_DIR = os.path.expanduser('~/.hr/log/ttsserver')
 TTS_TMP_OUTPUT_DIR = os.path.expanduser('~/.hr/ttsserver/tmp')
+DEFAULT_TTS_OUTPUT_DIR = os.path.expanduser('~/.hr/ttsserver')
 if not os.path.isdir(TTS_TMP_OUTPUT_DIR):
     os.makedirs(TTS_TMP_OUTPUT_DIR)
 VOICES = {}
@@ -37,11 +43,23 @@ def init_logging():
     if os.path.islink(link_log_fname):
         os.unlink(link_log_fname)
     os.symlink(log_config_file, link_log_fname)
-    fh = logging.FileHandler(log_config_file)
-    sh = logging.StreamHandler()
     formatter = logging.Formatter(
         '[%(name)s][%(levelname)s] %(asctime)s: %(message)s')
+    fh = logging.FileHandler(log_config_file)
     fh.setFormatter(formatter)
+    sh = logging.StreamHandler()
+    if 'colorlog' in sys.modules and os.isatty(2):
+        cformat = '%(log_color)s' + formatter._fmt
+        formatter = colorlog.ColoredFormatter(
+            cformat,
+            log_colors={
+                'DEBUG':'reset',
+                'INFO': 'reset',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'bold_red',
+            }
+        )
     sh.setFormatter(formatter)
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
@@ -156,9 +174,11 @@ def main():
         help='Whether or not keep tts audio on server')
     parser.add_argument(
         '--tts-output-dir',
-        dest='tts_output_dir', default='~/.hr/ttsserver', help='Server port')
+        dest='tts_output_dir', default=DEFAULT_TTS_OUTPUT_DIR,
+        help='TTS wave data save directory')
     parser.add_argument(
-        '--voice_path', default=os.path.join(cwd, 'api'), dest='voice_path', help='Voice path')
+        '--voice_path', default=os.path.join(cwd, 'api'), dest='voice_path',
+        help='Voice path')
 
     option = parser.parse_args()
 
