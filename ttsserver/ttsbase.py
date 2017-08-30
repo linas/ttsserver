@@ -62,6 +62,7 @@ class TTSBase(object):
         self.output_dir = '.'
         self.emo_cache_dir = '.' # emotive speech cache dir
         self.viseme_mapping = None
+        self.tts_params = {}
 
     def set_output_dir(self, output_dir):
         self.output_dir = os.path.expanduser(output_dir)
@@ -74,8 +75,11 @@ class TTSBase(object):
     def set_viseme_mapping(self, mapping):
         self.viseme_mapping = mapping
 
-    def get_tts_session_params(self):
-        raise NotImplementedError("get_tts_session_params is not implemented")
+    def get_tts_params(self):
+        return self.tts_params
+
+    def set_tts_params(self, **params):
+        self.tts_params.update(params)
 
     def get_emo_cache_file(self, text, params):
         if isinstance(text, unicode):
@@ -108,6 +112,7 @@ class TTSBase(object):
             if isinstance(text, unicode):
                 text = text.encode('utf8')
             tts_data = TTSData(text, wavout)
+            self.set_tts_params(**kwargs)
             self.do_tts(tts_data)
             emotion = kwargs.get('emotion')
             orig_duration = tts_data.get_duration()
@@ -234,7 +239,7 @@ class ChineseTTSBase(OnlineTTS):
             pys=[py for py in pys if re.match('[a-zA-Z]', py)]
             pys = ''.join(pys)
         pys = pys[:251-6-1]
-        suffix = hashlib.sha1(text+str(self.get_tts_session_params())).hexdigest()[:6]
+        suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
         filename = os.path.join(self.cache_dir, pys+'_'+suffix+'.wav')
         return filename
 

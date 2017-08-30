@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ttsserver',
-    version="0.2.2",
+    version="0.2.4",
     packages=['ttsserver', 'ttsserver.espp'],
     description=('Hanson Robotics TTS Server.'),
     url='https://github.com/hansonrobotics/ttsserver',
@@ -14,7 +14,7 @@ setup(
         'pysptk>=0.1.4',
         'numpy',
         'scipy',
-		'colorlog',
+        'colorlog',
     ],
     entry_points={
         'console_scripts': ['run_tts_server=ttsserver.server:main']
