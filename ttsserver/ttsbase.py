@@ -205,6 +205,17 @@ class OnlineTTS(TTSBase):
         super(OnlineTTS, self).set_output_dir(output_dir)
         self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
 
+    def get_cache_id(self, text):
+        if isinstance(text, unicode):
+            text = text.encode('utf-8')
+        suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
+        return text[:200]+'-'+suffix
+
+    def get_cache_file(self, text):
+        cache_id = self.get_cache_id(text)
+        filename = os.path.join(self.cache_dir, cache_id+'.wav')
+        return filename
+
     def offline_tts(self, tts_data):
         cache_file = self.get_cache_file(tts_data.text)
         if os.path.isfile(cache_file):

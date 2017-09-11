@@ -90,3 +90,4 @@ if __name__ == '__main__':
     #print parser.parse('*Hi there* |happy| this is **action mark down**')
     print parser.parse('*Hi there* |happy| |pause,2| this is **action mark down**')
     print parser.parse(u'*Hi ß there* |happy| |pause,2| this is **action mark down**')
+    print parser.parse(u'|vocal,2|')
