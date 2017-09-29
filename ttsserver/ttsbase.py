@@ -13,7 +13,10 @@ import xml.etree.ElementTree as ET
 import uuid
 import traceback
 
-from audio2phoneme import audio2phoneme
+try:
+    from audio2phoneme import audio2phoneme
+except ImportError as ex:
+    pass
 from ttsserver.visemes import BaseVisemes
 from espp.emotivespeech import emotive_speech
 
@@ -28,6 +31,19 @@ def get_duration(wav_fname):
     else:
         duration = 0.0
     return duration
+
+def is_xml(text):
+    if re.search(r'<.+>', text, re.UNICODE) is None:
+        return False
+    else:
+        if not isinstance(text, unicode):
+            text = text.decode('utf-8')
+        root = u'<_root_>{}</_root_>'.format(text)
+        try:
+            ET.fromstring(root.encode('utf-8'))
+        except Exception:
+            return False
+        return True
 
 def strip_xmltag(text):
     if not isinstance(text, unicode):
