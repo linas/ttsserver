@@ -9,7 +9,7 @@ import pinyin
 from scipy.io import wavfile
 import shutil
 import yaml
-import xml.etree.ElementTree
+import xml.etree.ElementTree as ET
 import uuid
 import traceback
 
@@ -28,6 +28,15 @@ def get_duration(wav_fname):
     else:
         duration = 0.0
     return duration
+
+def strip_xmltag(text):
+    if not isinstance(text, unicode):
+        text = text.decode('utf-8')
+    root = u'<_root_>{}</_root_>'.format(text)
+    tree = ET.fromstring(root.encode('utf-8'))
+    notags = ET.tostring(tree, encoding='utf8', method='text')
+    notags = notags.strip()
+    return notags
 
 # User data class to store information
 class TTSData:
@@ -208,6 +217,8 @@ class OnlineTTS(TTSBase):
     def get_cache_id(self, text):
         if isinstance(text, unicode):
             text = text.encode('utf-8')
+        text = strip_xmltag(text)
+        text = re.sub('[^\w_.)( -]', '', text)
         suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
         return text[:200]+'-'+suffix
 
@@ -273,7 +284,7 @@ class ChineseTTSBase(OnlineTTS):
 
     def is_ssml(self, text):
         try:
-            el = xml.etree.ElementTree.XML(text)
+            el = xml.etree.ET.XML(text)
             if el.tag == 'speak':
                 return True
             else:
