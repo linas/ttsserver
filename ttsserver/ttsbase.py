@@ -271,20 +271,6 @@ class ChineseTTSBase(OnlineTTS):
     def __init__(self):
         super(ChineseTTSBase, self).__init__()
 
-    def get_cache_file(self, text):
-        if isinstance(text, unicode):
-            text = text.encode('utf-8')
-        delimiter = '#'
-        pys = pinyin.get(text, delimiter=delimiter)
-        if pys:
-            pys = pys.split(delimiter)
-            pys=[py for py in pys if re.match('[a-zA-Z]', py)]
-            pys = ''.join(pys)
-        pys = pys[:251-6-1]
-        suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
-        filename = os.path.join(self.cache_dir, pys+'_'+suffix+'.wav')
-        return filename
-
     def nonchinese2pinyin(self, text):
         """replace non-Chinese characters to pinyins"""
         NON_CHN_MAP = {
