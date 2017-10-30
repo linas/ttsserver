@@ -36,11 +36,11 @@ class StrongPattern(Pattern):
     def get_nodes(self, match):
         el = etree.Element('prosody')
         el.text = match.group(3)
-        el.set('rate', '-30%')
-        el.set('volume', '+20%')
-        el.set('pitch', '+10%')
+        el.set('rate', '-20%')
+        el.set('volume', '+5%')
+        el.set('pitch', '+5%')
         el2 = etree.Element('break')
-        el2.set('time', '300ms')
+        el2.set('time', '150ms')
         return el2, el
 
 class MarkPattern(Pattern):
