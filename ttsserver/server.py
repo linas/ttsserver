@@ -29,6 +29,8 @@ logger = logging.getLogger('hr.tts.server')
 SERVER_LOG_DIR = os.path.expanduser('~/.hr/log/ttsserver')
 TTS_TMP_OUTPUT_DIR = os.path.expanduser('~/.hr/ttsserver/tmp')
 DEFAULT_TTS_OUTPUT_DIR = os.path.expanduser('~/.hr/ttsserver')
+if os.path.isdir(TTS_TMP_OUTPUT_DIR):
+    shutil.rmtree(TTS_TMP_OUTPUT_DIR)
 if not os.path.isdir(TTS_TMP_OUTPUT_DIR):
     os.makedirs(TTS_TMP_OUTPUT_DIR)
 VOICES = {}
