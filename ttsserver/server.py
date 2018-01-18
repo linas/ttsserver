@@ -136,11 +136,11 @@ def _tts():
                             notags = notags.strip()
                             if len(notags) > 200:
                                 notags = notags[:200]+'...' # prevent filename too long(255)
-                            tmp_file = '{} - {}.wav'.format(notags, timestamp)
+                            tmp_file = '{} - {}.wav'.format(timestamp, notags)
                         except Exception as ex:
                             logger.error(ex)
-                            tmp_file = '{} - {}.wav'.format(os.path.splitext(
-                                os.path.basename(tts_data.wavout))[0], timestamp)
+                            tmp_file = '{} - {}.wav'.format(timestamp, os.path.splitext(
+                                os.path.basename(tts_data.wavout))[0])
                         tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
                         try:
                             shutil.copy(tts_data.wavout, tmp_file)
