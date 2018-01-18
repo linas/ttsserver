@@ -143,7 +143,8 @@ def _tts():
                                 os.path.basename(tts_data.wavout))[0])
                         tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
                         try:
-                            shutil.copy(tts_data.wavout, tmp_file)
+                            if notags:
+                                shutil.copy(tts_data.wavout, tmp_file)
                         except IOError as err:
                             logger.error(err)
                         if not KEEP_AUDIO:
