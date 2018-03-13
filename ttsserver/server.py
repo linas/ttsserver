@@ -35,6 +35,12 @@ if not os.path.isdir(TTS_TMP_OUTPUT_DIR):
     os.makedirs(TTS_TMP_OUTPUT_DIR)
 VOICES = {}
 KEEP_AUDIO = False
+counter = 0
+
+def next_count():
+    global counter
+    counter += 1
+    return str(counter).zfill(4)
 
 def init_logging():
     if not os.path.isdir(SERVER_LOG_DIR):
@@ -129,6 +135,7 @@ def _tts():
                         f.close()
                     if os.path.isfile(tts_data.wavout):
                         timestamp = time.time()
+                        num = next_count()
                         try:
                             root = u'<_root_>{}</_root_>'.format(text)
                             tree = ET.fromstring(root.encode('utf-8'))
@@ -136,10 +143,10 @@ def _tts():
                             notags = notags.strip()
                             if len(notags) > 200:
                                 notags = notags[:200]+'...' # prevent filename too long(255)
-                            tmp_file = '{} - {}.wav'.format(timestamp, notags)
+                            tmp_file = '{}-{} - {}.wav'.format(num, timestamp, notags)
                         except Exception as ex:
                             logger.error(ex)
-                            tmp_file = '{} - {}.wav'.format(timestamp, os.path.splitext(
+                            tmp_file = '{}-{} - {}.wav'.format(num, timestamp, os.path.splitext(
                                 os.path.basename(tts_data.wavout))[0])
                         tmp_file = os.path.join(TTS_TMP_OUTPUT_DIR, tmp_file)
                         try:
