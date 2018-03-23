@@ -177,7 +177,7 @@ def main():
 
     parser.add_argument(
         '-p, --port',
-        dest='port', default=10001, help='Server port')
+        dest='port', default=10001, help='Server port', type=int)
     parser.add_argument(
         '--keep-audio',
         dest='keep_audio', action='store_true',
