@@ -146,6 +146,7 @@ def _tts():
                     if os.path.isfile(tts_data.wavout):
                         timestamp = time.time()
                         num = next_count()
+                        notags = None
                         try:
                             root = u'<_root_>{}</_root_>'.format(text)
                             tree = ET.fromstring(root.encode('utf-8'))
