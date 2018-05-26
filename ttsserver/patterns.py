@@ -66,7 +66,7 @@ class MarkPattern(Pattern):
                     raise SyntaxError('vocal syntax error: id is not integer')
                 el = etree.Element('spurt')
                 el.set('audio', 'g0001_{:03d}'.format(gid))
-                el.text = 'vocal gesture'
+                el.text = 'vocalgesture'
             else:
                 raise SyntaxError('vocal syntax error: not enough argument')
         else:
