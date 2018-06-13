@@ -109,6 +109,7 @@ class TTSBase(object):
         return self.tts_params
 
     def set_tts_params(self, **params):
+        self.tts_params = {}
         self.tts_params.update(params)
 
     def get_emo_cache_file(self, text, params):
