@@ -1,6 +1,7 @@
 import threading
 import logging
 import subprocess
+import os
 
 logger = logging.getLogger('hr.ttsserver.sound_file')
 
@@ -15,20 +16,22 @@ class SoundFile(object):
         self._interrupt.clear()
         try:
             with self.lock:
-                proc = subprocess.Popen(['aplay', wavfile])
-                job = threading.Timer(0, proc.wait)
-                job.daemon = True
-                job.start()
-                self.is_playing = True
-                while proc.poll() is None:
-                    if self._interrupt.is_set():
-                        proc.terminate()
+                with open(os.devnull, 'w') as devnull:
+                    proc = subprocess.Popen(['aplay', wavfile],
+                        stdout=devnull, stderr=devnull)
+                    job = threading.Timer(0, proc.wait)
+                    job.daemon = True
+                    job.start()
+                    self.is_playing = True
+                    while proc.poll() is None:
+                        if self._interrupt.is_set():
+                            proc.terminate()
         finally:
             self.is_playing = False
 
     def interrupt(self):
         self._interrupt.set()
-        logger.info("Sound file is interrupted")
+        logger.warn("Sound is interrupted")
 
 
 if __name__ == '__main__':
