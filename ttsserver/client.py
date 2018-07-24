@@ -93,6 +93,10 @@ class Client(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     client = Client()
+    result = client.tts('test', vendor='cereproc', voice='audrey')
+    visemes = result.response['visemes']
+    print visemes
+    result.write('test.wav')
     client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='sad', chunk_size=512, semitones=-2).write('happy.wav')
     client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='sad').write('sad.wav')
     client.tts('hello hello hello', vendor='cereproc', voice='katherine', emotion='afraid').write('afraid.wav')

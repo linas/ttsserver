@@ -11,10 +11,12 @@ setup(
     install_requires=[
         'flask',
         'sox>=1.2.9',
-        'pysptk>=0.1.4',
+        'pysptk==0.1.4',
         'numpy',
         'scipy',
         'colorlog',
+        'pinyin==0.2.5',
+        'pyyaml',
     ],
     entry_points={
         'console_scripts': ['run_tts_server=ttsserver.server:main']

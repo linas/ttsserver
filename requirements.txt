@@ -1,0 +1,9 @@
+flask
+sox>=1.2.9
+numpy
+scipy
+pysptk==0.1.4
+scipy
+colorlog
+pinyin==0.2.5
+pyyaml
