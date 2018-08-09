@@ -46,8 +46,9 @@ def next_count():
 def init_logging():
     run_id = None
     try:
-        run_id = subprocess.check_output('rosparam get /run_id'.split()).strip()
-    except Exception as ex:
+        run_id = subprocess.check_output(
+            'rosparam get /run_id'.split(), stderr=subprocess.STDOUT).strip()
+    except subprocess.CalledProcessError as ex:
         run_id = None
     ROS_LOG_DIR = os.environ.get('ROS_LOG_DIR', os.path.expanduser('~/.hr/log'))
     server_log_dir = SERVER_LOG_DIR

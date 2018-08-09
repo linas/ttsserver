@@ -25,7 +25,10 @@ class SoundFile(object):
                     self.is_playing = True
                     while proc.poll() is None:
                         if self._interrupt.is_set():
-                            proc.terminate()
+                            try:
+                                proc.terminate()
+                            except OSError:
+                                pass
         finally:
             self.is_playing = False
 
