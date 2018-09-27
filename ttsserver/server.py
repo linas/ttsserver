@@ -137,7 +137,7 @@ def _tts():
                 logger.info("TTS file {}".format(tts_data.wavout))
                 try:
                     with open(tts_data.wavout, 'rb') as f:
-                        header = f.read(44)
+                        header = f.read(42)
                         response['header'] = base64.b64encode(header)
                     f = wave.open(tts_data.wavout, 'rb')
                     data = f.readframes(f.getnframes())
