@@ -137,11 +137,9 @@ def _tts():
                 logger.info("TTS file {}".format(tts_data.wavout))
                 try:
                     with open(tts_data.wavout, 'rb') as f:
-                        header = f.read(42)
-                        response['header'] = base64.b64encode(header)
+                        raw = f.read()
+                        response['data'] = base64.b64encode(raw)
                     f = wave.open(tts_data.wavout, 'rb')
-                    data = f.readframes(f.getnframes())
-                    response['data'] = base64.b64encode(data)
                     response['params'] = f.getparams()
                 except Exception as ex:
                     logger.error(ex)

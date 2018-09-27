@@ -4,7 +4,6 @@
 import sys
 import requests
 import base64
-import wave
 import logging
 
 DEFAULT_HOST_URL = 'http://localhost:10001'
@@ -24,12 +23,10 @@ class TTSResponse(object):
 
     def write(self, wavfile):
         if self.response:
-            params = self.response['params']
             data = self.response['data']
             try:
-                f = wave.open(wavfile, 'wb')
-                f.setparams(params)
-                f.writeframes(data)
+                with open(wavfile, 'wb') as f:
+                    f.write(data)
                 logger.info("Write to file {}".format(wavfile))
                 return True
             except Exception as ex:
