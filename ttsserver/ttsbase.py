@@ -252,8 +252,7 @@ class OnlineTTS(TTSBase):
         cache_file = self.get_cache_file(tts_data.text)
         if os.path.isfile(cache_file):
             shutil.copy(cache_file, tts_data.wavout)
-            logger.info("Get offline tts for {} {}".format(
-                tts_data.text, cache_file))
+            logger.info("Get offline tts")
         else:
             raise TTSException("Offline tts failed, no such file {}".format(
                     self.get_cache_file(tts_data.text)))
@@ -262,7 +261,7 @@ class OnlineTTS(TTSBase):
         try:
             self.offline_tts(tts_data)
         except Exception as ex:
-            logger.warn(ex)
+            logger.exception(ex)
             self.online_tts(tts_data)
 
     def online_tts(self, tts_data):
