@@ -37,7 +37,7 @@ class StrongPattern(Pattern):
         el = etree.Element('prosody')
         el.text = match.group(3)
         el.set('rate', '-20%')
-        el.set('volume', '+5%')
+        el.set('volume', '+6dB')
         el.set('pitch', '+5%')
         el2 = etree.Element('break')
         el2.set('time', '150ms')
