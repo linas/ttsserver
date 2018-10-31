@@ -17,7 +17,7 @@ try:
     from audio2phoneme import audio2phoneme
 except ImportError as ex:
     pass
-from ttsserver.visemes import BaseVisemes
+from visemes import BaseVisemes
 from espp.emotivespeech import emotive_speech
 
 CWD = os.path.dirname(os.path.realpath(__file__))
@@ -61,9 +61,10 @@ def strip_xmltag(text):
 
 # User data class to store information
 class TTSData:
-    def __init__(self, text=None, wavout=None):
+    def __init__(self, text=None, id=None):
         self.text = text
-        self.wavout = wavout
+        self.id = id 
+        self.wavout = None
         self.phonemes = []
         self.markers = []
         self.words = []
@@ -170,70 +171,14 @@ class TTSBase(object):
             logger.error(traceback.format_exc())
 
 
-class Numb_Visemes(BaseVisemes):
-    # Mapping is approx. May need tunning
-    # All phonemes are from cereproc documentation
-    # https://www.cereproc.com/files/CereVoiceCloudGuide.pdf
-    default_visemes_map = {
-        'A-I': ['A','AA','AI','AU','AE','AH','AW','AX','AY','EY',],
-        'E': ['E','E@','EI','II','IY','EI', 'EH',],
-        'F-V': ['F','V'],
-        'Q-W': ['W'],
-        'L': ['@', '@@', 'I', 'I@','IH','L', 'R', 'Y', 'R'],
-        'C-D-G-K-N-S-TH': ['CH','D','DH','G','H','HH','JH','K','N','NG','S','SH','T','TH','Z','ZH','DX','ER',],
-        'M': ['B','M','P'],
-        'O': ['O','OI','OO','OU','AO','OW','OY',],
-        'U': ['U','U@','UH','UU','UW'],
-        'Sil': ['SIL']
-    }
-
-
-class NumbTTS(TTSBase):
-
-    def get_visemes(self, phonemes):
-        visemes = []
-        for ph in phonemes:
-            v = self.get_viseme(ph)
-            if v is not None:
-                visemes.append(v)
-        logger.debug("Get visemes {}".format(visemes))
-        return visemes
-
-    def do_tts(self, tts_data):
-        text = tts_data.text
-        fname = '{}.wav'.format(os.path.join(self.output_dir, text.strip()))
-        if os.path.isfile(fname):
-            shutil.copy(fname, tts_data.wavout)
-            try:
-                tts_data.phonemes = self.get_phonemes(fname)
-            except Exception as ex:
-                logger.error(traceback.format_exc())
-                tts_data.phonemes = []
-
-    def get_phonemes(self, fname):
-        timing = '{}.yaml'.format(os.path.splitext(fname)[0])
-        if os.path.isfile(timing):
-            with open(timing) as f:
-                phonemes = yaml.load(f)
-            logger.info("Get timing info from file")
-        else:
-            phonemes = [
-                {'type': 'phoneme', 'name': phoneme[0],
-                    'start': phoneme[1], 'end': phoneme[2]}
-                    for phoneme in audio2phoneme(fname)]
-            with open(timing, 'w') as f:
-                yaml.dump(phonemes, f)
-            logger.info("Write timing info to file")
-        return phonemes
-
-class OnlineTTS(TTSBase):
+class CachableTTS(TTSBase):
 
     def __init__(self):
-        super(OnlineTTS, self).__init__()
-        self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
+        super(CachableTTS, self).__init__()
+        self.cache_dir = os.path.expanduser('{}/cache'.format(self.output_dir))
 
     def set_output_dir(self, output_dir):
-        super(OnlineTTS, self).set_output_dir(output_dir)
+        super(CachableTTS, self).set_output_dir(output_dir)
         self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
 
     def get_cache_id(self, text):
@@ -242,6 +187,31 @@ class OnlineTTS(TTSBase):
         suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
         text = strip_xmltag(text)
         return text[:200]+'-'+suffix
+
+    def preprocess(self, tts_data):
+        """Find cache for audio and/or visemes"""
+
+        audio_file = os.path.join(self.cache_dir, cache_id+'.wav')
+        timing_info = os.path.join(self.cache_dir, cache_id+'.info')
+
+        if os.path.isfile(audio_file) and os.path.isfile(timing_info):
+            shutil.copy(audio_file, tts_data.wavout)
+            shutil.copy(timing_info, tts_data.info)
+            logger.info("Get offline tts")
+        else:
+            raise TTSException("Offline tts failed")
+
+    def do_tts(self, tts_data):
+        try:
+            self.preprocess(tts_data)
+        except Exception as ex:
+            logger.exception(ex)
+        self.do_tts(tts_data)
+
+class OnlineTTS(CachableTTS):
+
+    def __init__(self):
+        super(OnlineTTS, self).__init__()
 
     def get_cache_file(self, text):
         cache_id = self.get_cache_id(text)
