@@ -235,6 +235,8 @@ class OnlineTTS(TTSBase):
     def set_output_dir(self, output_dir):
         super(OnlineTTS, self).set_output_dir(output_dir)
         self.cache_dir =  os.path.expanduser('{}/cache'.format(self.output_dir))
+        if not os.path.isdir(self.cache_dir):
+            os.makedirs(self.cache_dir)
 
     def get_cache_id(self, text):
         if isinstance(text, unicode):
