@@ -12,6 +12,7 @@ CWD = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(CWD, '..'))
 
 from flask import Flask, request, Response
+from action_parser import ActionParser
 import json
 import wave
 import time
@@ -37,6 +38,7 @@ if not os.path.isdir(TTS_TMP_OUTPUT_DIR):
 VOICES = {}
 KEEP_AUDIO = False
 counter = 0
+parser = ActionParser()
 
 def next_count():
     global counter
@@ -131,8 +133,26 @@ def _tts():
             response['markers'] = tts_data.markers
             response['words'] = tts_data.words
             response['visemes'] = tts_data.visemes
-            response['duration'] = tts_data.get_duration()
             response['nodes'] = tts_data.get_nodes()
+            # overwrite audio by the embedded marker |audio, filepath|
+            audio_nodes = [node for node in response['nodes'] if node['type']=='marker' and node['name'].startswith('audio')]
+            if audio_nodes:
+                audio_node_name = audio_nodes[0]['name']
+                if ',' in audio_node_name:
+                    name, filepath = audio_node_name.split(',', 1)
+                    filepath = filepath.strip()
+                    filepath = os.path.expanduser(filepath)
+                    if os.path.isfile(filepath):
+                        try:
+                            shutil.copy(filepath, tts_data.wavout)
+                            logger.warn('Overwrite audio output with %s', filepath)
+                        except Exception as ex:
+                            logger.exception(ex)
+                            raise ex
+                    else:
+                        raise Exception("Audio file %s doesn't exist", filepath)
+            response['duration'] = tts_data.get_duration()
+
             if tts_data.wavout:
                 logger.info("TTS file {}".format(tts_data.wavout))
                 try:
@@ -152,6 +172,7 @@ def _tts():
                         num = next_count()
                         notags = None
                         try:
+                            text = parser.parse(text)
                             root = u'<_root_>{}</_root_>'.format(text)
                             tree = ET.fromstring(root.encode('utf-8'))
                             notags = ET.tostring(tree, encoding='utf8', method='text')
