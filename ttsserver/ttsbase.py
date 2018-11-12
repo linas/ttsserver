@@ -23,6 +23,7 @@ from espp.emotivespeech import emotive_speech
 CWD = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger('hr.ttsserver.ttsbase')
 
+ILLEGAL_CHARS = re.compile(r"""[^A-Za-z0-9._-]""")
 
 def get_duration(wav_fname):
     if os.path.isfile(wav_fname):
@@ -243,6 +244,7 @@ class OnlineTTS(TTSBase):
             text = text.encode('utf-8')
         suffix = hashlib.sha1(text+str(self.get_tts_params())).hexdigest()[:6]
         text = strip_xmltag(text)
+        text = ILLEGAL_CHARS.sub('', text)
         return text[:200]+'-'+suffix
 
     def get_cache_file(self, text):
