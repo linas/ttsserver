@@ -12,6 +12,7 @@ import yaml
 import xml.etree.ElementTree as ET
 import uuid
 import traceback
+import subprocess
 
 try:
     from audio2phoneme import audio2phoneme
@@ -27,11 +28,12 @@ ILLEGAL_CHARS = re.compile(r"""[^A-Za-z0-9._-]""")
 
 def get_duration(wav_fname):
     if os.path.isfile(wav_fname):
-        rate, data = wavfile.read(wav_fname)
-        duration = data.shape[0]/rate
-    else:
-        duration = 0.0
-    return duration
+        try:
+            duration = float(subprocess.check_output('sox --i -D %s' % wav_fname, shell=True))
+            return duration
+        except Exception as ex:
+            logger.error(ex)
+    return 0.0
 
 def is_xml(text):
     if re.search(r'<.+>', text, re.UNICODE) is None:
