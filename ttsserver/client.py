@@ -6,7 +6,8 @@ import requests
 import base64
 import logging
 
-DEFAULT_HOST_URL = 'http://localhost:10001'
+DEFAULT_HOST = 'localhost'
+DEFAULT_PORT = 10001
 
 logger = logging.getLogger('hr.ttserver.client')
 
@@ -47,9 +48,10 @@ class Client(object):
 
     VERSION = 'v1.0'
 
-    def __init__(self, host=None):
-        self.host = host or DEFAULT_HOST_URL
-        self.root_url = '{}/{}'.format(self.host, Client.VERSION)
+    def __init__(self, host=None, port=None):
+        self.host = host or DEFAULT_HOST
+        self.port = host or DEFAULT_PORT
+        self.root_url = 'http://{}:{}/{}'.format(self.host, self.port, Client.VERSION)
 
     def tts(self, text, **kwargs):
         params = {
