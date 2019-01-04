@@ -50,7 +50,7 @@ class Client(object):
 
     def __init__(self, host=None, port=None):
         self.host = host or DEFAULT_HOST
-        self.port = host or DEFAULT_PORT
+        self.port = port or DEFAULT_PORT
         self.root_url = 'http://{}:{}/{}'.format(self.host, self.port, Client.VERSION)
 
     def tts(self, text, **kwargs):
