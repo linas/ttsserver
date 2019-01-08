@@ -25,6 +25,7 @@ class TTSResponse(object):
     def write(self, wavfile):
         if self.response:
             data = self.response['data']
+            data = base64.b64decode(data)
             try:
                 with open(wavfile, 'wb') as f:
                     f.write(data)
@@ -65,9 +66,6 @@ class Client(object):
                 '{}/tts'.format(self.root_url), params=params, timeout=timeout)
             if r.status_code == 200:
                 response = r.json().get('response')
-                data = response['data']
-                data = base64.b64decode(data)
-                response['data'] = data
                 result.response = response
                 result.params = params
             else:
