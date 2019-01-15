@@ -55,11 +55,14 @@ class MarkPattern(Pattern):
                 name, time = name.split(',', 1)
             else:
                 time = '1s'
+            time = time.strip()
             el = etree.Element('break')
             el.set('time', time)
         elif name.startswith('vocal'):
             if ',' in name:
                 name, gid = name.split(',', 1)
+                name = name.strip()
+                gid = gid.strip()
                 try:
                     gid = int(gid)
                 except SyntaxError:
