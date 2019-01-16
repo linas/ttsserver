@@ -56,6 +56,8 @@ class MarkPattern(Pattern):
             else:
                 time = '1s'
             time = time.strip()
+            if not time.endswith('s'):
+                time = time+'s'
             el = etree.Element('break')
             el.set('time', time)
         elif name.startswith('vocal'):
