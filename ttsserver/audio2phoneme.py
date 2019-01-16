@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 from __future__ import division
 import os
 import sys

@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 import scipy
 from scipy.io import wavfile
 from scipy.fftpack import rfft, irfft, fftfreq

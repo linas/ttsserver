@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 import xml.etree.ElementTree as etree
 import StringIO
 from patterns import StrongPattern, EmphasisPattern, MarkPattern
