@@ -1,4 +1,14 @@
-# Run TTS Server
+# Text to Speech Server
+
+This is a server that can provide audio output for text input, using any one
+of several different systems, including the CMU Festival system and Cereproc.
+
+This does not include voices.
+
+This is a basic server; it does not offer any means of syncing sound to animation.
+There's minimal (i.e. no) control for timing, articulation, intonation, rhythm.
+
+## Run TTS Server
 
 ```bash
 usage: HR TTS Server [-h] [-p, --port PORT] [--keep-audio]
@@ -15,9 +25,13 @@ optional arguments:
                         Voice path
 ```
 
-# Call TTS Server
+## Call TTS Server
 
-## Using curl
+### Call TTS using curl
 
 `curl "http://<host>:<port>/v1.0/tts?emotion=happy&text=hello&voice=audrey&vendor=cereproc"`
-##### Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
+
+## Status
+As of 2019, this is in acttive use for various Hanson Robotics demos.
+
+##### Copyright (c) 2017-2019 Hanson Robotics, Ltd. 
