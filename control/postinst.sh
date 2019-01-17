@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 
 if [[ -e /usr/bin/hr ]]; then
     hr cmd pip2_install numpy scipy

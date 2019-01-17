@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 import numpy as np
 from numpy import nan
 from scipy.io import wavfile

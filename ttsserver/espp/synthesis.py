@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 from scipy.signal import butter
 import numpy as np
 from sox.transform import Transformer

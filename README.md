@@ -20,3 +20,4 @@ optional arguments:
 ## Using curl
 
 `curl "http://<host>:<port>/v1.0/tts?emotion=happy&text=hello&voice=audrey&vendor=cereproc"`
+##### Copyright (c) 2013-2019 Hanson Robotics, Ltd. 

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 import numpy as np
 import preprocess as prep
 import batchprocess as bp

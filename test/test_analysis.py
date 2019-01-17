@@ -1,3 +1,4 @@
+# Copyright (c) 2013-2019 Hanson Robotics, Ltd. 
 import unittest
 from scipy.io import wavfile
 import numpy
