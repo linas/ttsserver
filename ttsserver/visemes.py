@@ -10,16 +10,19 @@ class BaseVisemes:
     # rampout: time to ramp in in % of duration
     # magnitude: magnitude in blender
     visemes_param = {
-       'A-I':               {'duration': 2.2, 'rampin': 0.35, 'rampout': 0.25, 'magnitude': 0.99},
-       'E':                 {'duration': 2.5, 'rampin': 0.40, 'rampout': 0.25, 'magnitude': 0.99},
-       'F-V':               {'duration': 1.0, 'rampin': 0.25, 'rampout': 0.25, 'magnitude': 0.99},
-       'Q-W':               {'duration': 1.0, 'rampin': 0.25, 'rampout': 0.25, 'magnitude': 0.99},
-       'L':                 {'duration': 1.0, 'rampin': 0.25, 'rampout': 0.25, 'magnitude': 0.99},
-       'C-D-G-K-N-S-TH':    {'duration': 1.5, 'rampin': 0.35, 'rampout': 0.25, 'magnitude': 0.99},
-       'M':                 {'duration': 1.2, 'rampin': 0.35, 'rampout': 0.25, 'magnitude': 0.99},
-       'O':                 {'duration': 2.3, 'rampin': 0.40, 'rampout': 0.25, 'magnitude': 0.99},
-       'U':                 {'duration': 2.0, 'rampin': 0.35, 'rampout': 0.25, 'magnitude': 0.99},
-       'Sil':               {'duration': 2.0, 'rampin': 0.35, 'rampout': 0.25, 'magnitude': 0.99},
+       'A-I':               {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'E':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'F-V':               {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'Q-W':               {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'L':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'C-D-G-K-N-S-TH':    {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'M':                 {'duration': 2.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'O':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'U':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'u':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       's':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'S':                 {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
+       'Sil':               {'duration': 1.0, 'rampin': 0.2, 'rampout': 0.2, 'magnitude': 0.99},
     }
 
     def __init__(self):
