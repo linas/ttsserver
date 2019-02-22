@@ -42,7 +42,7 @@ def is_xml(text):
     else:
         if not isinstance(text, unicode):
             text = text.decode('utf-8')
-        root = u'<_root_>{}</_root_>'.format(text)
+        root = u'<_root_ xmlns:amazon="www.amazon.com">{}</_root_>'.format(text)
         try:
             ET.fromstring(root.encode('utf-8'))
         except Exception:
