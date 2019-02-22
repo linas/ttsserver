@@ -54,7 +54,7 @@ def strip_xmltag(text):
     if not isinstance(text, unicode):
         text = text.decode('utf-8')
         convert = True
-    root = u'<_root_>{}</_root_>'.format(text)
+    root = u'<_root_ xmlns:amazon="www.amazon.com">{}</_root_>'.format(text)
     tree = ET.fromstring(root.encode('utf-8'))
     notags = ET.tostring(tree, encoding='utf8', method='text')
     notags = notags.strip()
